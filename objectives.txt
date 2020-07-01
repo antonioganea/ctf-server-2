@@ -1,0 +1,65 @@
+CTF CHALLENGE 2
+
+Objective : Reach 10,000 score points in "Bunny chases carrot"
+
+How the game works :
+The bunny and carrot both lie on a grid, so they have coordinates like
+(1, 0) (0, 0), (7, 6), (5, 4), (5, 3)
+
+When a socket connects to the game, the bunny resets to (0, 0) and the score
+is reset.
+The server will send you two 32-bit ints which represent the
+(x, y) position of the carrot when you connect.
+
+void sendPositionOverSocket( sf::TcpSocket & sock, sf::Vector2i pos ){
+    sock.setBlocking(true); // make sure you send the data all at once
+    char buf[8]; // create an 8 byte buffer
+    memcpy(buf,&pos.x,4); // copy position.x in the first 4 bytes of buf
+    memcpy(buf+4,&pos.y,4); // copy position.y in buf, starting at buf+4
+    sock.send(buf,8); // send the 8 bytes of data
+    sock.setBlocking(false); // this feature is only needed on the server, no need to worry about it
+}
+
+This is how the server sends you a location.
+'buf' is an array of chars ( bytes ).
+
+Running this printing code on that 'buf' :
+for ( int i = 0; i < 8; i++ ){
+    cout << (int)buf[i] << ' ';
+}
+
+might yield this:
+---------------
+5 0 0 0 3 0 0 0
+---------------
+( carrot is at (5, 3) )
+
+
+Sending is not fragmented : it will send you 8 bytes each time it sends you something.
+The only info that it sends is the position of the carrot.
+When you first connect, it sends you the position of the carrot, and when you eat a carrot,
+it sends you the position of the new carrot. Nothing else.
+
+Controlling the bunny:
+
+You have to send the server one byte for the bunny to make one move.
+You can however send an array of multiple bytes for the bunny to make more moves at once.
+
+The following codes represent what the bunny should do:
+0x0001: bunny.move(0,-1); // bunny goes up
+0x0002: bunny.move(0,1); // bunny goes down
+0x0003: bunny.move(-1,0); // bunny goes left
+0x0004: bunny.move(1,0); // bunny goes right
+anything else you send, that is not 1/2/3/4 is dropped.
+
+If you send this buffer to the server :
+----------------
+2 4 2 4 2 4 2 4
+----------------
+the bunny goes 4 tiles right and 4 tiles down
+
+When you reach 10,000 score points, you will get a big "CRACKED" message on-screen
+Good luck!
+
+
+Code can be found at : https://github.com/antonioganea/ctf-server-2
