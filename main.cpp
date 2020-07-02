@@ -21,10 +21,12 @@ void sendPositionOverSocket( sf::TcpSocket & sock, sf::Vector2i pos ){
 
     sock.send(buf,8);
 
+    /*
     cout << "sending bytes  ";
     for ( int i = 0; i < 8; i++ ){
         cout << (int)buf[i] << ' ';
     }
+    */
 
     sock.setBlocking(false);
 }
@@ -319,7 +321,7 @@ int main()
             if ( status != sf::Socket::Status::NotReady ){
                 // cout << "Status : " << status << endl;
                 for ( int i = 0; i < received; i++ ){
-                    //cout << arrBuf[i];
+                    cout << (int)arrBuf[i];
 
                     switch(arrBuf[i]) {
                     case 0x0001:
